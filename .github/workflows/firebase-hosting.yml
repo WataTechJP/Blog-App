@@ -1,0 +1,31 @@
+name: Deploy to Firebase Hosting on merge
+
+on:
+  push:
+    branches:
+      - main # 🔹 main ブランチに push されたときに実行
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔹 リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🔹 Node.js をセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18" # Node.js のバージョンを指定
+
+      - name: 🔹 Firebase CLI をインストール
+        run: npm install -g firebase-tools
+
+      - name: 🔹 依存関係をインストール（Vite プロジェクト）
+        run: npm ci
+
+      - name: 🔹 Vite プロジェクトをビルド
+        run: npm run build
+
+      - name: 🔹 Firebase Hosting にデプロイ
+        run: firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}"
