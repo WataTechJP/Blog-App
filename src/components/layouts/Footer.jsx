@@ -10,14 +10,14 @@ const Footer = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="text-white cursor-pointer">
-            <img src="../../../public/icons/email.svg" alt="" width={50} height={50}/>
+            <img src="/icons/email.svg" alt="" width={50} height={50}/>
             </a>
             <a
               href="https://www.linkedin.com/in/wataru-okada-509319334"
               target="_blank"
               rel="noopener noreferrer"
               className="text-white cursor-pointer">
-            <img src="../../../public/icons/linkedin.svg" alt=""  width={50} height={50}/>
+            <img src="/icons/linkedin.svg" alt=""  width={50} height={50}/>
             </a>
             <a
               href="https://github.com/WataTechJP"
@@ -25,7 +25,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-white"
             >
-              <img src="../../../public/icons/github.svg" alt=""  width={50} height={50}/>
+              <img src="/icons/github.svg" alt=""  width={50} height={50}/>
             </a>
             <a
               href="https://www.instagram.com/6crazyinsane9/"
@@ -33,7 +33,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-white"
             >
-              <img src="../../../public/icons/instagram.svg" alt=""  width={50} height={50}/>
+              <img src="/icons/instagram.svg" alt=""  width={50} height={50}/>
             </a>
             <a
               href="https://www.facebook.com/okada.wataru.79"
@@ -41,7 +41,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-white"
             >
-                <img src="../../../public/icons/facebook.svg" alt=""  width={50} height={50}/>
+                <img src="/icons/facebook.svg" alt=""  width={50} height={50}/>
             </a>
           </div>
           <hr className="mx-20 my-2" />
