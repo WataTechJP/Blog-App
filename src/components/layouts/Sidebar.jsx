@@ -4,6 +4,9 @@ import { auth } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Link } from "react-router-dom";
+
+
 
  
 const Sidebar = () => {
@@ -74,17 +77,19 @@ const Sidebar = () => {
         {/* ナビゲーションメニュー */}
         <ul className="flex-grow text-xl">
           <li className="p-3 cursor-pointer transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:bg-gray-700">
-            <a href="/home" className="block w-full h-full">
-            <img src="../../../public/icons/home.svg" alt="" width={25} height={25} className="inline-block mr-2 mb-2"/>
-            Home</a>
+            <Link to={"/home"} onClick={() => setIsOpen(false)} className="block w-full h-full"><img src="/public/icons/home.svg" alt="" width={25} height={25} className="inline-block mr-2 mb-2"/>
+            Home
+            </Link>
           </li>
           <li className="p-3 cursor-pointer transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:bg-gray-700">
-            <a href="/postList" className="block w-full h-full"><img src="../../../public/icons/postList.svg" alt="" width={25} height={25} className="inline-block mr-2 mb-2"/>
-            All Posts</a>
+            <Link to={"/postList"} onClick={() => setIsOpen(false)} className="block w-full h-full"><img src="/icons/postList.svg" alt="" width={25} height={25} className="inline-block mr-2 mb-2"/>
+            Post List            
+            </Link>
           </li>
-          <li className=" p-3 cursor-pointer transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:bg-gray-700">
-            <a href="/create" className="block w-full h-full"><img src="../../../public/icons/newPost.svg" alt="" width={25} height={25} className="inline-block mr-2"/>
-            New Post</a>
+          <li className="p-3 cursor-pointer transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:bg-gray-700">
+            <Link to={"/create"} onClick={() => setIsOpen(false)} className="block w-full h-full"><img src="/icons/newPost.svg" alt="" width={25} height={25} className="inline-block mr-2"/>
+            New Post
+            </Link>
           </li>
         </ul>
       </div>

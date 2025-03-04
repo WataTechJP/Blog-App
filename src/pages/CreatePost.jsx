@@ -3,6 +3,11 @@ import { db, auth, storage } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
+import Button from "../components/common/Button";
+
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 function CreatePost() {
   const [title, setTitle] = useState("");
@@ -12,61 +17,71 @@ function CreatePost() {
   const [imageUrl, setImageUrl] = useState(""); // アップロード後のURLを保存
   const navigate = useNavigate();
 
-  // 📌 Firebase に投稿データを保存
+
   const createPost = async () => {
   if (!auth.currentUser) {
-    console.log('❌ No user logged in');
+    toast.warn("Please login first", { autoClose: 3000 });
     return;
   }
 
-  try {
-    console.log("✅ 投稿データを準備中...");
-    
-    let uploadedImageUrl = "";
-    if (image) {
-      console.log("📌 画像をアップロード中...");
-      const imageRef = ref(storage, `posts/${image.name}`);
-      await uploadBytes(imageRef, image);
-      uploadedImageUrl = await getDownloadURL(imageRef);
-      console.log("✅ 画像URL:", uploadedImageUrl);
-    }
+  if (!title || !content) {
+    if(window.confirm("Title or Content is empty. Do you want to post anyway?")) {
+      try {
 
-    const docRef = await addDoc(collection(db, "posts"), {
-      title,
-      date,
-      content,
-      imageUrl: uploadedImageUrl, // 画像のURLを保存
-      author: {
-        name: auth.currentUser.displayName,
-        uid: auth.currentUser.uid,
-      },
-      createdAt: serverTimestamp(),
-    });
+      let uploadedImageUrl = "";
+      if (image) {
+        const imageRef = ref(storage, `posts/${auth.currentUser.uid}_${image.name}`);
+        const metadata = { customMetadata: { owner: auth.currentUser.uid } };
+        
+        await uploadBytes(imageRef, image, metadata);
+        uploadedImageUrl = await getDownloadURL(imageRef);
+      }
 
-    console.log("✅ Firestore に投稿完了！ Doc ID:", docRef.id);
-    navigate("/home");
-  } catch (error) {
-    console.error("❌ Firestore 投稿エラー:", error);
+      const docRef = await addDoc(collection(db, "posts"), {
+        title: title || "Untitled",
+        date,
+        content: content || "No Content",
+        imageUrl: uploadedImageUrl,
+        author: {
+          name: auth.currentUser.displayName,
+          uid: auth.currentUser.uid,
+        },
+        createdAt: serverTimestamp(),
+      });
+      toast.success("Post created successfully!", { autoClose: 2000 });
+      navigate("/home");
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      toast.error("Failed to create post. Please try again later."), { autoClose: 3000 };
   }
-};
-
-  // 📌 画像選択 & プレビュー表示
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageUrl(reader.result); // プレビュー用に画像URLをセット
-      };
-      reader.readAsDataURL(file);
     }
-  };
+  } else {
+    navigate("/create");
+    }
+  }
+
+
+  
+
+  const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  setImage(file);
+
+  const reader = new FileReader();
+  reader.onloadend = () => setImageUrl(reader.result);
+  reader.readAsDataURL(file);
+};
 
   const handleCancelImage = () => {
     setImage(null);
     setImageUrl("");
     document.getElementById("image").value = "";
+  };
+
+  const toHome = () => {
+    navigate("/home");
   };
 
 
@@ -75,25 +90,20 @@ function CreatePost() {
       <div className="text-4xl font-bold my-5">
         <h1>Record your current mood</h1>
       </div>
-
-      
-      {/* 入力フィールド */}
-      <div className="min-w-full"><label htmlFor="title" className="font-bold text-xl">Title:</label>
+      <div className="min-w-full"><label htmlFor="title" className="font-bold text-xl">Title: {title}</label>
         <input
           type="text"
           placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-2 border rounded mb-4 text-black"
+          className="w-full p-2 border rounded mb-4 text-black dark:bg-gray-800 dark:text-white"
           id="title"
           name="title"
         />
-        {/* 画像アップロード */}
         <div className="mb-4"><label htmlFor="image" className="font-bold text-xl">Image:</label><br />
             {imageUrl && (
               <div>
                 <img src={imageUrl} alt="Preview" className="w-auto h-auto object-cover rounded-lg mb-2" />
-                {/* 📌 画像があるときだけ "Remove Image" ボタンを表示 */}
                 {imageUrl && (
                   <button 
                     onClick={handleCancelImage} 
@@ -119,7 +129,7 @@ function CreatePost() {
           placeholder="How do you feel now?"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full p-2 border rounded mb-4 text-black"
+          className="w-full p-2 border rounded mb-4 text-black dark:bg-gray-800 dark:text-white"
           id="content"
           name="content"
           cols="30"
@@ -127,14 +137,13 @@ function CreatePost() {
         />
       </div>
 
-      {/* ボタン */}
-      <div className="flex justify-center">
-        <button onClick={createPost} className="bg-green-500 text-white px-6 py-2 rounded-lg mr-20">
+      <div className="flex justify-center mb-6">
+        <Button onClick={createPost} className="bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded-lg mr-20">
           Post
-        </button>
-        <button className="bg-red-500 text-white px-6 py-2 rounded-lg">
-          <a href="/home">Cancel</a>
-        </button>
+        </Button>
+        <Button onClick={toHome} className="bg-red-500 hover:bg-red-700 text-white px-6 py-2 rounded-lg">
+          Cancel
+        </Button>
       </div>
     </div>
   );
