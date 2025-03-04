@@ -61,7 +61,7 @@ function Login() {
           onChange={(e) => setEmail(e.target.value)}
           className="w-80 p-2 border text-black rounded"
         />
-        <p className="text-red-700 mb-2">hint: wattjk5971usgo@gmail.com</p>
+        {/* <p className="text-red-700 mb-2">hint: wattjk5971usgo@gmail.com</p> */}
         <input 
           type="password"
           placeholder="Password"
@@ -69,7 +69,7 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
           className="w-80 p-2 border text-black rounded"
         />
-        <p className="text-red-700 mb-4">hint: wattech</p>
+        {/* <p className="text-red-700 mb-4">hint: wattech</p> */}
 
         <div className="flex flex-col text-center items-center justify-center">
           <button 

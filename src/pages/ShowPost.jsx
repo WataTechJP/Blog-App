@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import Button from "../components/common/Button";
 
 function ShowPost() {
   const { id } = useParams();
@@ -53,18 +54,18 @@ function ShowPost() {
         </button>
       </div>
       <div className="flex flex-row justify-between">
-        <button 
+        <Button 
         onClick={() => navigate("/postList")} 
         className="float-right bg-red-500 hover:bg-red-700 text-white px-6 py-2 rounded-lg mt-4 block mx-auto"
       >
         Back To Post List
-      </button>
-      <button 
+      </Button>
+      <Button 
         onClick={() => navigate("/home")} 
         className="bg-red-500 hover:bg-red-700 text-white px-6 py-2 rounded-lg mt-4 block mx-auto"
       >
         Back To Home
-      </button>
+      </Button>
       </div>
       
     </div>
