@@ -67,7 +67,7 @@ const Sidebar = () => {
         } z-40 flex flex-col justify-between`}
       >
         {/* ヘッダー部分 */}
-        <div className="px-3 text-center text-4xl font-bold">
+        <div className="top-4 px-3 text-center text-4xl font-bold">
           <h1>BLOG<br/> APP</h1>
         </div>
         <div className="text-right px-3 text-xl ">
@@ -77,7 +77,7 @@ const Sidebar = () => {
         {/* ナビゲーションメニュー */}
         <ul className="flex-grow text-xl">
           <li className="p-3 cursor-pointer transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:bg-gray-700">
-            <Link to={"/home"} onClick={() => setIsOpen(false)} className="block w-full h-full"><img src="/public/icons/home.svg" alt="" width={25} height={25} className="inline-block mr-2 mb-2"/>
+            <Link to={"/home"} onClick={() => setIsOpen(false)} className="block w-full h-full"><img src="/icons/home.svg" alt="" width={25} height={25} className="inline-block mr-2 mb-2"/>
             Home
             </Link>
           </li>
