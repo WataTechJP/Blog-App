@@ -36,7 +36,7 @@ function ShowPost() {
 
       <div className="bg-white shadow-lg rounded-2xl p-6">
         <h2 className="text-black text-2xl font-bold mb-4">{post.title}</h2>
-        <p className="text-gray-500 mb-4">{new Date(post.createdAt).toLocaleString()}</p>
+        <p className="text-gray-500 mb-4">{new Date(post.createdAt.seconds * 1000).toLocaleString()}</p>
 
         {post.imageUrl && (
           <img src={post.imageUrl} alt={post.title} className="w-full h-auto rounded-lg shadow mb-4" />
