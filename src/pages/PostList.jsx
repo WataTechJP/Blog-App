@@ -11,55 +11,60 @@ const POSTS_PER_PAGE = 10;
 
 export const PostList = () => {
     const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true); 
+    const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const toastDisplayed = useRef(false); 
+    const toastDisplayed = useRef(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!toastDisplayed.current) { 
-            toast.info("Data fetching now...", { autoClose: 2000 });
+        if (!toastDisplayed.current) {
+            toast.info("⏳ Fetching posts...", { autoClose: 2000 });
             toastDisplayed.current = true;
         }
 
         const fetchPosts = async () => {
-            const q = query(collection(db, "posts"), orderBy("createdAt", "desc")); // Firestore で並び替え
-            const querySnapshot = await getDocs(q);
+            try {
+                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
 
-            
-            setPosts(querySnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            })));
+                const fetchedPosts = querySnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
 
-            setTimeout(() => {
+                setPosts(fetchedPosts);
                 setLoading(false);
-                if (fetchedPosts.length === 0) {
-                    toast.warn("No posts available.", { autoClose: 3000 });
-                } else {
-                    toast.success("Posts fetched successfully!", { autoClose: 3000 });
-                }
-            }, 2000);
+
+                setTimeout(() => {
+                    if (fetchedPosts.length === 0) {
+                        toast.warn("⚠️ No posts available.", { autoClose: 3000 });
+                    }
+                }, 2000);
+            } catch (error) {
+                console.error("❌ Error fetching posts:", error);
+                toast.error("⚠️ Failed to fetch posts.", { autoClose: 3000 });
+            }
         };
 
         fetchPosts();
     }, []);
 
     const deletePost = async (postId, imageUrl) => {
-        if (window.confirm("Are you sure you want to delete this post?")) {
-            try {
-                await deleteDoc(doc(db, "posts", postId));
-                setPosts(posts.filter((post) => post.id !== postId));
+        if (!window.confirm("Are you sure you want to delete this post?")) return;
 
-                if (imageUrl) {
-                    const imageRef = ref(storage, imageUrl);
-                    await deleteObject(imageRef);
-                    toast.success("Posts deleted successfully!", { autoClose: 3000 });
-                }
-            } catch (error) {
-                console.error("Error deleting post:", error);
-                toast.warn("Failed to delete post.", { autoClose: 3000 });
+        try {
+            await deleteDoc(doc(db, "posts", postId));
+            setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+
+            if (imageUrl) {
+                const imageRef = ref(storage, imageUrl);
+                await deleteObject(imageRef);
             }
+
+            toast.success("✅ Post deleted successfully!", { autoClose: 3000 });
+        } catch (error) {
+            console.error("❌ Error deleting post:", error);
+            toast.warn("⚠️ Failed to delete post.", { autoClose: 3000 });
         }
     };
 
@@ -78,15 +83,17 @@ export const PostList = () => {
             </div>
 
             {loading ? (
-                <p className="text-red-500 text-lg">⏳ Data fetching now...</p>
+                <p className="text-red-500 text-lg">⏳ Fetching posts...</p>
             ) : selectedPosts.length === 0 ? (
-                <p className="text-gray-500">No posts available.</p>
+                <p className="text-gray-500 text-4xl font-bold">No posts available.</p>
             ) : (
                 selectedPosts.map((post, index) => (
                     <div key={post.id} className="bg-gray-100 rounded-md w-full p-6 my-2 shadow-lg">
                         <div className="text-black p-6">
                             <div className="flex text-center mb-2">
-                                <h1 className="text-lg font-semibold">#{posts.length - startIndex - index} - {post.title}</h1>
+                                <h1 className="text-lg font-semibold">
+                                    #{posts.length - startIndex - index} - {post.title}
+                                </h1>
                             </div>
 
                             <div className="mb-6 p-4 border rounded shadow-sm">
@@ -97,7 +104,7 @@ export const PostList = () => {
                                     <>
                                         <label className="block font-medium mt-2">Image:</label>
                                         <div>
-                                            <img src={post.imageUrl} alt={post.title} className="w-full h-auto rounded-lg shadow" />
+                                            <img src={post.imageUrl} alt={post.title} className="w-full h-fit rounded-lg shadow" />
                                         </div>
                                     </>
                                 )}
@@ -115,15 +122,16 @@ export const PostList = () => {
                                         More Details
                                     </Link>
 
-                                    <Button onClick={() => deletePost(post.id, post.imageUrl)}
-                                        className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-700">
-                                            Delete
+                                    <Button
+                                        onClick={() => deletePost(post.id, post.imageUrl)}
+                                        className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-700"
+                                    >
+                                        Delete
                                     </Button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
                 ))
             )}
 

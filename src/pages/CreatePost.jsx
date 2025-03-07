@@ -25,41 +25,40 @@ function CreatePost() {
   }
 
   if (!title || !content) {
-    if(window.confirm("Title or Content is empty. Do you want to post anyway?")) {
-      try {
-
-      let uploadedImageUrl = "";
-      if (image) {
-        const imageRef = ref(storage, `posts/${auth.currentUser.uid}_${image.name}`);
-        const metadata = { customMetadata: { owner: auth.currentUser.uid } };
-        
-        await uploadBytes(imageRef, image, metadata);
-        uploadedImageUrl = await getDownloadURL(imageRef);
-      }
-
-      const docRef = await addDoc(collection(db, "posts"), {
-        title: title || "Untitled",
-        date,
-        content: content || "No Content",
-        imageUrl: uploadedImageUrl,
-        author: {
-          name: auth.currentUser.displayName,
-          uid: auth.currentUser.uid,
-        },
-        createdAt: serverTimestamp(),
-      });
-      toast.success("Post created successfully!", { autoClose: 2000 });
-      navigate("/home");
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      toast.error("Failed to create post. Please try again later."), { autoClose: 3000 };
-  }
-    }
-  } else {
-    navigate("/create");
+    if (!window.confirm("Title or Content is empty. Do you want to post anyway?")) {
+      return;
     }
   }
 
+  try {
+    let uploadedImageUrl = "";
+    if (image) {
+      const imageRef = ref(storage, `posts/${auth.currentUser.uid}_${image.name}`);
+      const metadata = { customMetadata: { owner: auth.currentUser.uid } };
+
+      await uploadBytes(imageRef, image, metadata);
+      uploadedImageUrl = await getDownloadURL(imageRef);
+    }
+
+    const docRef = await addDoc(collection(db, "posts"), {
+      title: title || "Untitled",
+      date,
+      content: content || "No Content",
+      imageUrl: uploadedImageUrl,
+      author: {
+        name: auth.currentUser.displayName,
+        uid: auth.currentUser.uid,
+      },
+      createdAt: serverTimestamp(),
+    });
+
+    toast.success("Post created successfully!", { autoClose: 2000 });
+    navigate("/home");
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    toast.error("Failed to create post. Please try again later.", { autoClose: 3000 });
+  }
+};
 
   
 
