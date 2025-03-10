@@ -15,6 +15,13 @@ function CreatePost() {
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(""); // アップロード後のURLを保存
+  const clearVal = () => {
+    setTitle("");
+    setDate("");
+    setContent("");
+    setImage(null);
+    setImageUrl("");
+  };
   const navigate = useNavigate();
 
 
@@ -139,6 +146,9 @@ function CreatePost() {
       <div className="flex justify-center mb-6">
         <Button onClick={createPost} className="bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded-lg mr-20">
           Post
+        </Button>
+        <Button onClick={clearVal} className="bg-yellow-500 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg mr-20">
+          Clear
         </Button>
         <Button onClick={toHome} className="bg-red-500 hover:bg-red-700 text-white px-6 py-2 rounded-lg">
           Cancel

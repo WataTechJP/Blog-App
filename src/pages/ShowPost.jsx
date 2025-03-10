@@ -39,7 +39,7 @@ function ShowPost() {
         <p className="text-gray-500 mb-4">{new Date(post.createdAt.seconds * 1000).toLocaleString()}</p>
 
         {post.imageUrl && (
-          <img src={post.imageUrl} alt={post.title} className="w-full h-auto rounded-lg shadow mb-4" />
+          <img src={post.imageUrl} alt={post.title} className="w-full h-auto max-h-[500px] object-cover rounded-lg shadow mb-4 transition-transform duration-500 hover:scale-105" />
         )}
 
         <p className="text-black">
