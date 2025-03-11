@@ -3,10 +3,10 @@ import Sidebar from "./components/layouts/Sidebar";
 import Footer from "./components/layouts/Footer";
 import Home from "./pages/Home";
 import CreatePost from "./pages/CreatePost";
-import Login from "./pages/Login";
-import Edit from "./pages/Edit";
 import ShowPost from "./pages/ShowPost";
 import PostList from "./pages/PostList";
+import Login from "./pages/Login";
+
 
 function Layout() {
   const location = useLocation();

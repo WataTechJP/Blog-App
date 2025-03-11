@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { db, storage } from "../firebase";
 import { collection, getDocs, doc, deleteDoc, query, orderBy } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Button from "../components/common/Button";
@@ -14,7 +14,6 @@ export const PostList = () => {
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const toastDisplayed = useRef(false);
-    const navigate = useNavigate();
 
     useEffect(() => {
         if (!toastDisplayed.current) {
@@ -104,7 +103,7 @@ export const PostList = () => {
                                     <>
                                         <label className="block font-medium mt-2">Image:</label>
                                         <div>
-                                            <img src={post.imageUrl} alt={post.title} className="w-full h-fit rounded-lg shadow" />
+                                            <img src={post.imageUrl} alt={post.title} className="w-full h-auto max-h-[500px] object-cover rounded-lg shadow mb-4" />
                                         </div>
                                     </>
                                 )}
@@ -115,7 +114,24 @@ export const PostList = () => {
                                 </p>
 
                                 <label className="block font-medium mt-2">Content:</label>
-                                <p className="text-gray-700">{post.content}</p>
+                                <p className="text-gray-700 whitespace-pre-wrap break-words">{post.content && typeof post.content === 'string' 
+                                    ? (() => {
+                                        const charLimit = 50; // 最大文字数
+                                        const wordLimit = 20; // 最大単語数
+
+                                        const words = post.content.split(/\s+/); // 空白で単語に分割
+                                        const truncatedWords = words.slice(0, wordLimit).join(" "); // 最初の10単語を取得
+                                        const truncatedText = post.content.slice(0, charLimit); // 最初の20文字を取得
+
+                                        if (post.content.length > charLimit || words.length > wordLimit) {
+                                            return truncatedText.length < truncatedWords.length
+                                                ? truncatedText + "..."
+                                                : truncatedWords + "...";
+                                            } else {
+                                            return post.content; // すべての文字が収まるなら "..." を追加しない
+                                            }
+                                        })()
+                                    : "No content"}</p>
 
                                 <div className="flex justify-between mt-4">
                                     <Link to={`/show/${post.id}`} className="text-blue-500 hover:text-blue-800 font-semibold underline">
@@ -179,3 +195,4 @@ export const PostList = () => {
 };
 
 export default PostList;
+

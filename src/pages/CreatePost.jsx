@@ -1,12 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import { db, auth, storage } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useNavigate } from "react-router-dom";
+
 import Button from "../components/common/Button";
 
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 
 function CreatePost() {
@@ -15,6 +17,13 @@ function CreatePost() {
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(""); // アップロード後のURLを保存
+  const clearVal = () => {
+    setTitle("");
+    setDate("");
+    setContent("");
+    setImage(null);
+    setImageUrl("");
+  };
   const navigate = useNavigate();
 
 
@@ -86,7 +95,7 @@ function CreatePost() {
 
   return (
     <div className="flex flex-col items-center max-w-2xl mx-auto mt-10">
-      <div className="text-4xl font-bold my-5">
+      <div className="md:text-4xl xl:text-5xl font-bold my-5">
         <h1>Record your current mood</h1>
       </div>
       <div className="min-w-full"><label htmlFor="title" className="font-bold text-xl">Title: {title}</label>
@@ -98,6 +107,7 @@ function CreatePost() {
           className="w-full p-2 border rounded mb-4 text-black dark:bg-gray-800 dark:text-white"
           id="title"
           name="title"
+          maxLength={25}
         />
         <div className="mb-4"><label htmlFor="image" className="font-bold text-xl">Image:</label><br />
             {imageUrl && (
@@ -136,9 +146,12 @@ function CreatePost() {
         />
       </div>
 
-      <div className="flex justify-center mb-6">
+      <div className="flex justify-center mb-6 mx-auto">
         <Button onClick={createPost} className="bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded-lg mr-20">
           Post
+        </Button>
+        <Button onClick={clearVal} className="bg-yellow-500 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg mr-20">
+          Clear
         </Button>
         <Button onClick={toHome} className="bg-red-500 hover:bg-red-700 text-white px-6 py-2 rounded-lg">
           Cancel

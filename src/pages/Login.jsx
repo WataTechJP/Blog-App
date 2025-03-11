@@ -1,15 +1,19 @@
-import { useState, useEffect } from "react";
-import { auth, provider } from "../firebase";
-import { signInWithEmailAndPassword, signInWithPopup, getRedirectResult } from "firebase/auth";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+import { auth, provider } from "../firebase";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+
+import Button from "../components/common/Button";
 
 function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  //Sign in with Google
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
@@ -24,22 +28,7 @@ function Login() {
     }
   };
 
-  useEffect(() => {
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result) {
-          console.log("Login successful:", result);
-          toast.success("Login Successful!");
-          setTimeout(() => {
-            navigate("/home");
-          }, 1500);
-        }
-      })
-      .catch((error) => {
-        console.error("Error getting redirect result:", error);
-      });
-  }, [navigate]);
-
+  //Sign in with Email and Password
   const signInWithEmail = async () => {
     if (!email || !password) {
       toast.warn("Please enter your email and password.");
@@ -78,14 +67,14 @@ function Login() {
         className="w-80 p-2 border text-black rounded mb-4"
       />
       <div className="flex flex-col text-center items-center justify-center">
-        <button onClick={signInWithEmail} className="bg-blue-500 text-white px-6 py-2 rounded-lg">
+        <Button onClick={signInWithEmail} className="bg-blue-500 text-white px-6 py-2 rounded-lg">
           Login with Email and Password
           <img src="/icons/email.svg" alt="" width={20} height={20} className="inline-block ml-2"/>
-        </button>
+        </Button>
         <h1 className="text-black my-3">OR</h1>
-        <button onClick={signInWithGoogle} className="bg-red-500 text-white px-6 py-2 rounded-lg">
+        <Button onClick={signInWithGoogle} className="bg-red-500 text-white px-6 py-2 rounded-lg">
           Login with Google<img src="/icons/google.svg" alt="" width={20} height={20} className="inline-block ml-2 bg-white rounded-full"/>
-        </button>
+        </Button>
       </div>
     </div>
   );

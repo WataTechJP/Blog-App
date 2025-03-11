@@ -1,7 +1,12 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef} from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { createPortal } from "react-dom";
+
 import { db } from "../firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { useNavigate, Link } from "react-router-dom";
+
+import Modal from "../components/common/Modal";
+import CreatePost from "./CreatePost";
 import Button from "../components/common/Button";
 
 // Import GSAP and ScrollTrigger
@@ -9,11 +14,20 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
+//Modal Portal
+  const ModalPortal = ({children}) => {
+    const target = document.querySelector('.container.create-post');
+    return createPortal(children, target);  
+  };
+
 function Home() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [animationsInitialized, setAnimationsInitialized] = useState(false);
   const navigate = useNavigate();
+
+  //Define Modal State
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Refs for animations
   const sectionRefs = {
@@ -22,6 +36,10 @@ function Home() {
     postsSection: useRef(null)
   };
   const postItemsRef = useRef([]);
+  
+  
+
+  
 
   // Fetching posts from Firestore
   useEffect(() => {
@@ -34,7 +52,6 @@ function Home() {
           id: doc.id,
           ...doc.data(),
         }));
-        
         setPosts(postsData);
         console.log("Posts fetched:", postsData.length);
       } catch (error) {
@@ -210,7 +227,6 @@ function Home() {
     gsap.set(elements, { clearProps: "all", opacity: 1, y: 0, scale: 1 });
   };
 
-  const toCreatePage = () => navigate("/create");
   const toPostList = () => navigate("/postList");
 
   return (
@@ -226,20 +242,32 @@ function Home() {
       </div>
 
       {/* Create Post Section */}
-      <div ref={sectionRefs.createSection} className="text-black bg-gray-100 rounded-md w-full md:w-7/12 p-6 my-10" style={{ opacity: 1 }}>
-        <div className="bg-white shadow-lg rounded-2xl p-6 transition-all duration-300 hover:shadow-xl">
+      <div 
+        ref={sectionRefs.createSection} 
+        className="text-black bg-gray-100 rounded-md w-full md:w-7/12 p-6 my-10"
+        style={{ opacity: 1 }}
+      >
+        
+        <div className="container create-post"></div>
+         <div className="bg-white shadow-lg rounded-2xl p-6 transition-all duration-300 hover:shadow-xl">
           <h2 className="text-black text-2xl font-bold mb-4">Leave Your Current Feeling</h2>
-          <Button 
-            onClick={toCreatePage} 
-            className="bg-red-500 hover:bg-red-700 text-white text-xl px-9 py-2 rounded-3xl transition-all duration-300 transform hover:scale-105"
-          >
-            New Post Here
+        
+          <Button onClick={() => setModalOpen(true)} disabled={modalOpen}
+                    className="bg-red-500 hover:bg-red-700 text-white text-xl px-9 py-2 rounded-3xl transition-all duration-300 transform hover:scale-105 relative"> New Post Here
           </Button>
+      
+          {modalOpen && (
+            <ModalPortal>
+              <Modal handleCloseClick={() => setModalOpen(false)}>
+                <CreatePost />
+              </Modal>
+            </ModalPortal>
+          )}
         </div>
       </div>
 
       {/* Posts Section */}
-      <div ref={sectionRefs.postsSection} className="bg-gray-100 rounded-md max-w-7xl w-full p-6 my-5" style={{ opacity: 1 }}>
+      <div ref={sectionRefs.postsSection} className="bg-gray-100 rounded-md max-w-7xl w-full p-6 my-5">
         <h2 className="flex flex-col text-center text-black font-bold text-4xl my-3">All Posts</h2>
         <div className="bg-white shadow-lg rounded-2xl p-6">
           <h2 className="section-subtitle text-black text-2xl font-bold mb-6">See Your Precious Memories</h2>
@@ -257,7 +285,6 @@ function Home() {
                       key={post.id}
                       ref={(el) => (postItemsRef.current[index] = el)}
                       className="p-5 border border-gray-200 rounded-lg shadow-sm text-black transition-all duration-300 hover:shadow-md hover:border-gray-300"
-                      style={{ opacity: 1 }} // Force visibility with inline style
                     >
                       <h2 className="text-xl font-bold">{post.title}</h2>
                       <p className="text-gray-500 text-sm mt-1">
@@ -271,19 +298,30 @@ function Home() {
                               src={post.imageUrl} 
                               alt={post.title} 
                               className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
-                              onError={(e) => {
-                                console.error("Image failed to load:", post.imageUrl);
-                                e.target.src = "https://via.placeholder.com/400x200?text=Image+Not+Available";
-                              }}
                             />
                           </div>
                         </div>
                       )}
 
-                      <p className="mt-3 text-gray-700">
+                      <p className="mt-3 text-gray-700 whitespace-pre-wrap break-words">
                         {post.content && typeof post.content === 'string' 
-                          ? post.content.split("\n").slice(0, 2).join("\n") + "..." 
-                          : "No content available"}
+                          ? (() => {
+                            const charLimit = 30; // 最大文字数
+                            const wordLimit = 20; // 最大単語数
+
+                            const words = post.content.split(/\s+/); // 空白で単語に分割
+                            const truncatedWords = words.slice(0, wordLimit).join(" "); // 最初の10単語を取得
+                            const truncatedText = post.content.slice(0, charLimit); // 最初の20文字を取得
+
+                           if (post.content.length > charLimit || words.length > wordLimit) {
+                            return truncatedText.length < truncatedWords.length
+                              ? truncatedText + "..."
+                              : truncatedWords + "...";
+                          } else {
+                            return post.content; // すべての文字が収まるなら "..." を追加しない
+                          }
+                        })()
+                          : "No content"}
                       </p>
 
                       <Link 

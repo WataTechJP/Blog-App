@@ -7,7 +7,6 @@ import Button from "../components/common/Button";
 function ShowPost() {
   const { id } = useParams();
   const [post, setPost] = useState(null);
-  const [showFull, setShowFull] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,19 +38,12 @@ function ShowPost() {
         <p className="text-gray-500 mb-4">{new Date(post.createdAt.seconds * 1000).toLocaleString()}</p>
 
         {post.imageUrl && (
-          <img src={post.imageUrl} alt={post.title} className="w-full h-auto rounded-lg shadow mb-4" />
+          <img src={post.imageUrl} alt={post.title} className="w-full h-auto max-h-[500px] object-cover rounded-lg shadow mb-4" />
         )}
 
-        <p className="text-black">
-          {showFull ? post.content : post.content.split("\n").slice(0, 2).join("\n") + "..."}
+        <p className="text-black whitespace-pre-wrap break-words">
+          {post.content}
         </p>
-
-        <button 
-          onClick={() => setShowFull(!showFull)} 
-          className="text-blue-500 underline mt-4"
-        >
-          {showFull ? "Close" : "Read More"}
-        </button>
       </div>
       <div className="flex flex-row justify-between">
         <Button 
