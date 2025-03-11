@@ -132,14 +132,31 @@ function CreatePost({ handleClose }) {
           rows="10"
         />
       </div>
-      <div className="flex justify-center mb-6 mx-auto">
-        <Button onClick={createPost} className="bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
+      <div className="flex flex-wrap justify-center gap-4 mb-6 w-full">
+        <Button 
+          onClick={createPost} 
+          className="bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded-lg w-1/3 min-w-[120px]"
+        >
           Post
         </Button>
-        <Button onClick={() => { setTitle(""); setDate(""); setContent(""); setImage(null); setImageUrl(""); }} className="bg-yellow-500 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg mx-20">
+        
+        <Button 
+          onClick={() => { 
+            setTitle(""); 
+            setDate(""); 
+            setContent(""); 
+            setImage(null); 
+            setImageUrl(""); 
+          }} 
+          className="bg-yellow-500 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg w-1/3 min-w-[120px]"
+        >
           Clear
         </Button>
-        <Button onClick={handleClose} className="bg-red-500 hover:bg-red-700 text-white px-6 py-2 rounded-lg">
+        
+        <Button 
+          onClick={handleClose} 
+          className="bg-red-500 hover:bg-red-700 text-white px-6 py-2 rounded-lg w-1/3 min-w-[120px]"
+        >
           Cancel
         </Button>
       </div>
