@@ -1,11 +1,11 @@
 import { useEffect, useState, useRef} from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { createPortal } from "react-dom";
 
 import { db } from "../firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 import Modal from "../components/common/Modal";
+import ModalPortal from "../components/common/ModalPortal";
 import CreatePost from "./CreatePost";
 import Button from "../components/common/Button";
 
@@ -14,19 +14,12 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
-//Modal Portal
-  const ModalPortal = ({children}) => {
-    const target = document.querySelector('.container.create-post');
-    return createPortal(children, target);  
-  };
-
 function Home() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [animationsInitialized, setAnimationsInitialized] = useState(false);
   const navigate = useNavigate();
 
-  //Define Modal State
   const [modalOpen, setModalOpen] = useState(false);
 
   // Refs for animations
@@ -37,23 +30,17 @@ function Home() {
   };
   const postItemsRef = useRef([]);
   
-  
-
-  
-
   // Fetching posts from Firestore
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
-
         const postsData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         setPosts(postsData);
-        console.log("Posts fetched:", postsData.length);
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {
@@ -73,6 +60,8 @@ function Home() {
   // Make sure posts are visible first, then handle animations
   useEffect(() => {
     if (loading || animationsInitialized) return;
+
+    
     
     // First ensure all posts are visible
     const elements = [
@@ -227,8 +216,6 @@ function Home() {
     gsap.set(elements, { clearProps: "all", opacity: 1, y: 0, scale: 1 });
   };
 
-  const toPostList = () => navigate("/postList");
-
   return (
     <div className="flex flex-col items-center text-center mx-auto mt-60 min-h-screen">
       {/* Hero Section */}
@@ -247,19 +234,26 @@ function Home() {
         className="text-black bg-gray-100 rounded-md w-full md:w-7/12 p-6 my-10"
         style={{ opacity: 1 }}
       >
-        
         <div className="container create-post"></div>
-         <div className="bg-white shadow-lg rounded-2xl p-6 transition-all duration-300 hover:shadow-xl">
+        <div className="bg-white shadow-lg rounded-2xl p-6 transition-all duration-300 hover:shadow-xl">
           <h2 className="text-black text-2xl font-bold mb-4">Leave Your Current Feeling</h2>
         
-          <Button onClick={() => setModalOpen(true)} disabled={modalOpen}
-                    className="bg-red-500 hover:bg-red-700 text-white text-xl px-9 py-2 rounded-3xl transition-all duration-300 transform hover:scale-105 relative"> New Post Here
+          {/* Create Post Button */}
+          <Button 
+            onClick={() => {
+              setModalOpen(true);
+            }}
+            disabled={modalOpen}
+            className="bg-red-500 hover:bg-red-700 text-white text-xl px-9 py-2 rounded-3xl transition-all duration-300 transform hover:scale-105 relative"
+          > 
+            New Post Here
           </Button>
-      
+
+          {/* Modal */}
           {modalOpen && (
             <ModalPortal>
               <Modal handleCloseClick={() => setModalOpen(false)}>
-                <CreatePost />
+                <CreatePost handleClose={() => setModalOpen(false)} />
               </Modal>
             </ModalPortal>
           )}
@@ -280,7 +274,7 @@ function Home() {
             <>
               <div className="posts-container space-y-8">
                 {posts.length > 0 ? (
-                  posts.slice(0, 4).map((post, index) => (
+                  posts.slice(0, 5).map((post, index) => (
                     <div
                       key={post.id}
                       ref={(el) => (postItemsRef.current[index] = el)}
@@ -306,24 +300,24 @@ function Home() {
                       <p className="mt-3 text-gray-700 whitespace-pre-wrap break-words">
                         {post.content && typeof post.content === 'string' 
                           ? (() => {
-                            const charLimit = 30; // 最大文字数
-                            const wordLimit = 20; // 最大単語数
+                            const charLimit = 30; // Maximum characters
+                            const wordLimit = 20; // Maximum words
 
-                            const words = post.content.split(/\s+/); // 空白で単語に分割
-                            const truncatedWords = words.slice(0, wordLimit).join(" "); // 最初の10単語を取得
-                            const truncatedText = post.content.slice(0, charLimit); // 最初の20文字を取得
+                            const words = post.content.split(/\s+/); // Split by whitespace
+                            const truncatedWords = words.slice(0, wordLimit).join(" "); // Get the first 10 words
+                            const truncatedText = post.content.slice(0, charLimit); // Get the first 20 characters
 
                            if (post.content.length > charLimit || words.length > wordLimit) {
                             return truncatedText.length < truncatedWords.length
                               ? truncatedText + "..."
                               : truncatedWords + "...";
                           } else {
-                            return post.content; // すべての文字が収まるなら "..." を追加しない
+                            return post.content; // Don't add "..." if all characters fit
                           }
                         })()
                           : "No content"}
                       </p>
-
+                      
                       <Link 
                         to={`/show/${post.id}`} 
                         className="inline-block mt-4 px-4 py-2 text-blue-500 border border-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition-colors duration-300"
@@ -338,11 +332,11 @@ function Home() {
                   </div>
                 )}
               </div>
-
-              {posts.length > 0 && (
-                <div className="mt-10 text-center">
+              
+              {posts.length > 5 && (
+                <div className="my-4 text-center">
                   <Button 
-                    onClick={toPostList} 
+                    onClick={() => navigate("/postList")} 
                     className="see-more-btn bg-red-500 hover:bg-red-700 text-white px-8 py-3 rounded-lg focus:outline-none transition-all duration-300 hover:shadow-lg"
                   >
                     See More Posts
