@@ -303,10 +303,25 @@ function Home() {
                         </div>
                       )}
 
-                      <p className="mt-3 text-gray-700">
+                      <p className="mt-3 text-gray-700 whitespace-pre-wrap break-words">
                         {post.content && typeof post.content === 'string' 
-                          ? post.content.split("\n").slice(0, 2).join("\n") + "..." 
-                          : "No content available"}
+                          ? (() => {
+                            const charLimit = 30; // 最大文字数
+                            const wordLimit = 20; // 最大単語数
+
+                            const words = post.content.split(/\s+/); // 空白で単語に分割
+                            const truncatedWords = words.slice(0, wordLimit).join(" "); // 最初の10単語を取得
+                            const truncatedText = post.content.slice(0, charLimit); // 最初の20文字を取得
+
+                           if (post.content.length > charLimit || words.length > wordLimit) {
+                            return truncatedText.length < truncatedWords.length
+                              ? truncatedText + "..."
+                              : truncatedWords + "...";
+                          } else {
+                            return post.content; // すべての文字が収まるなら "..." を追加しない
+                          }
+                        })()
+                          : "No content"}
                       </p>
 
                       <Link 
