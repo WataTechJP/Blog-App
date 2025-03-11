@@ -40,7 +40,7 @@ export const PostList = () => {
                     }
                 }, 2000);
             } catch (error) {
-                console.error("❌ Error fetching posts:", error);
+                console.error("Error fetching posts:", error);
                 toast.error("⚠️ Failed to fetch posts.", { autoClose: 3000 });
             }
         };
@@ -62,7 +62,7 @@ export const PostList = () => {
 
             toast.success("✅ Post deleted successfully!", { autoClose: 3000 });
         } catch (error) {
-            console.error("❌ Error deleting post:", error);
+            console.error("Error deleting post:", error);
             toast.warn("⚠️ Failed to delete post.", { autoClose: 3000 });
         }
     };
@@ -116,19 +116,19 @@ export const PostList = () => {
                                 <label className="block font-medium mt-2">Content:</label>
                                 <p className="text-gray-700 whitespace-pre-wrap break-words">{post.content && typeof post.content === 'string' 
                                     ? (() => {
-                                        const charLimit = 50; // 最大文字数
-                                        const wordLimit = 20; // 最大単語数
+                                        const charLimit = 50; // Max characters
+                                        const wordLimit = 20; // Max words
 
-                                        const words = post.content.split(/\s+/); // 空白で単語に分割
-                                        const truncatedWords = words.slice(0, wordLimit).join(" "); // 最初の10単語を取得
-                                        const truncatedText = post.content.slice(0, charLimit); // 最初の20文字を取得
+                                        const words = post.content.split(/\s+/); // Whitespace characters
+                                        const truncatedWords = words.slice(0, wordLimit).join(" "); // First 20 words
+                                        const truncatedText = post.content.slice(0, charLimit); // First 50 characters
 
                                         if (post.content.length > charLimit || words.length > wordLimit) {
                                             return truncatedText.length < truncatedWords.length
                                                 ? truncatedText + "..."
                                                 : truncatedWords + "...";
                                             } else {
-                                            return post.content; // すべての文字が収まるなら "..." を追加しない
+                                            return post.content; // No truncation needed if content is less than 50 characters or 20 words 
                                             }
                                         })()
                                     : "No content"}</p>

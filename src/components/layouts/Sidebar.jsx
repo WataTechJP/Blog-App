@@ -6,9 +6,6 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 
-
-
- 
 const Sidebar = () => {
   const navigate = useNavigate();
 
@@ -19,12 +16,12 @@ const Sidebar = () => {
       await signOut(auth);
       toast.success("Logout Successful!");
 
-      // 1.5秒後にログインページへ遷移
+      // Transition to the home page after 1.5 seconds
       setTimeout(() => {
         navigate("/");
       }, 1500);
     } catch (error) {
-      console.error("❌ ログアウトエラー:", error);
+      console.error("Logout error:", error);
       alert("Logout Failed: " + error.message);
     }
   };
@@ -32,7 +29,7 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* ☰ メニューアイコン（左上に固定） */}
+      {/* menu button */}
        {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -42,7 +39,7 @@ const Sidebar = () => {
         </button>
       )}
 
-      {/* 📌 Close & Logout ボタン（サイドバーの外） */}
+      {/* Close & Logout button */}
       {isOpen && (
         <div className="fixed top-4 left-48 flex flex-col space-y-2 z-50">
           <button
@@ -60,13 +57,13 @@ const Sidebar = () => {
         </div>
       )}
 
-      {/* 📌 サイドバー */}
+      {/* SideBar */}
       <div
         className={`fixed top-0 left-0 h-full bg-gray-800 opacity-70 text-white w-48 transition-transform ${
           isOpen ? "translate-x-0" : "-translate-x-64"
         } z-40 flex flex-col justify-between`}
       >
-        {/* ヘッダー部分 */}
+        {/* Head */}
         <div className="top-4 px-3 text-center text-4xl font-bold">
           <h1>BLOG<br/> APP</h1>
         </div>
@@ -74,7 +71,7 @@ const Sidebar = () => {
             <h1>By W.O.</h1>
         </div>
 
-        {/* ナビゲーションメニュー */}
+        {/* Navigation menu */}
         <ul className="flex-grow text-xl">
           <li className="p-3 cursor-pointer transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:bg-gray-700">
             <Link to={"/home"} onClick={() => setIsOpen(false)} className="block w-full h-full"><img src="/icons/home.svg" alt="" width={25} height={25} className="inline-block mr-2 mb-2"/>

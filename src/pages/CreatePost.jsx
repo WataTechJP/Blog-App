@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -9,96 +9,84 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 import Button from "../components/common/Button";
 
-
-
-function CreatePost() {
+function CreatePost({ handleClose }) {  
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState(""); // アップロード後のURLを保存
-  const clearVal = () => {
-    setTitle("");
-    setDate("");
-    setContent("");
-    setImage(null);
-    setImageUrl("");
-  };
+  const [imageUrl, setImageUrl] = useState("");
+  const [postSuccess] = useState(false);
+
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (postSuccess) {
+      navigate("/home");
+    }
+  }, [postSuccess, navigate]);
 
   const createPost = async () => {
-  if (!auth.currentUser) {
-    toast.warn("Please login first", { autoClose: 3000 });
-    return;
-  }
-
-  if (!title || !content) {
-    if (!window.confirm("Title or Content is empty. Do you want to post anyway?")) {
+    if (!auth.currentUser) {
+      toast.warn("Please login first", { autoClose: 3000 });
       return;
     }
-  }
 
-  try {
-    let uploadedImageUrl = "";
-    if (image) {
-      const imageRef = ref(storage, `posts/${auth.currentUser.uid}_${image.name}`);
-      const metadata = { customMetadata: { owner: auth.currentUser.uid } };
-
-      await uploadBytes(imageRef, image, metadata);
-      uploadedImageUrl = await getDownloadURL(imageRef);
+    if (!title || !content) {
+      if (!window.confirm("Title or Content is empty. Do you want to post anyway?")) {
+        return;
+      }
     }
 
-    const docRef = await addDoc(collection(db, "posts"), {
-      title: title || "Untitled",
-      date,
-      content: content || "No Content",
-      imageUrl: uploadedImageUrl,
-      author: {
-        name: auth.currentUser.displayName,
-        uid: auth.currentUser.uid,
-      },
-      createdAt: serverTimestamp(),
-    });
+    try {
+      let uploadedImageUrl = "";
+      if (image) {
+        const imageRef = ref(storage, `posts/${auth.currentUser.uid}_${image.name}`);
+        const metadata = { customMetadata: { owner: auth.currentUser.uid } };
 
-    toast.success("Post created successfully!", { autoClose: 2000 });
-    navigate("/home");
-  } catch (error) {
-    console.error("Error adding document: ", error);
-    toast.error("Failed to create post. Please try again later.", { autoClose: 3000 });
-  }
-};
+        await uploadBytes(imageRef, image, metadata);
+        uploadedImageUrl = await getDownloadURL(imageRef);
+      }
 
-  
+      const docRef = await addDoc(collection(db, "posts"), {
+        title: title || "Untitled",
+        date,
+        content: content || "No Content",
+        imageUrl: uploadedImageUrl,
+        author: {
+          name: auth.currentUser.displayName,
+          uid: auth.currentUser.uid,
+        },
+        createdAt: serverTimestamp(),
+      });
 
-  const handleImageChange = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+      if (!docRef.id) {
+        throw new Error("Failed to retrieve document ID");
+      }
 
-  setImage(file);
+      toast.success("Post created successfully!", { autoClose: 2000 });
 
-  const reader = new FileReader();
-  reader.onloadend = () => setImageUrl(reader.result);
-  reader.readAsDataURL(file);
-};
+      if (typeof handleClose === "function") {
+          handleClose();
+          
+        }
 
-  const handleCancelImage = () => {
-    setImage(null);
-    setImageUrl("");
-    document.getElementById("image").value = "";
+        setTimeout(() => {
+          navigate("/home");
+          window.location.reload();
+        }, 3000); // Reload the page after 3 seconds
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        toast.error("Failed to create post. Please try again later.", { autoClose: 3000 });
+      }
   };
-
-  const toHome = () => {
-    navigate("/home");
-  };
-
 
   return (
     <div className="flex flex-col items-center max-w-2xl mx-auto mt-10">
-      <div className="md:text-4xl xl:text-5xl font-bold my-5">
+      <div className="text-[clamp(1.5rem,5vw,2.5rem)] font-bold my-5 text-center">
         <h1>Record your current mood</h1>
       </div>
-      <div className="min-w-full"><label htmlFor="title" className="font-bold text-xl">Title: {title}</label>
+      <div className="min-w-full">
+        <label htmlFor="title" className="font-bold text-xl">Title: {title}</label>
         <input
           type="text"
           placeholder="Title"
@@ -109,30 +97,29 @@ function CreatePost() {
           name="title"
           maxLength={25}
         />
-        <div className="mb-4"><label htmlFor="image" className="font-bold text-xl">Image:</label><br />
-            {imageUrl && (
-              <div>
-                <img src={imageUrl} alt="Preview" className="w-auto h-auto object-cover rounded-lg mb-2" />
-                {imageUrl && (
-                  <button 
-                    onClick={handleCancelImage} 
-                    className="bg-red-500 text-white text-sm px-2 py-1 mb-2 rounded-lg"
-                  >
-                    Remove This Image
-                  </button>
-                )}
-              </div>
-            )}
-            
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleImageChange} 
-              id="image"
-              name="image"
-            />
-          </div>
-
+        <div className="mb-4">
+          <label htmlFor="image" className="font-bold text-xl">Image:</label><br />
+          {imageUrl && (
+            <div>
+              <img src={imageUrl} alt="Preview" className="w-auto h-auto object-cover rounded-lg mb-2" />
+              {imageUrl && (
+                <button 
+                  onClick={() => { setImage(null); setImageUrl(""); }}
+                  className="bg-red-500 text-white text-sm px-2 py-1 mb-2 rounded-lg"
+                >
+                  Remove This Image
+                </button>
+              )}
+            </div>
+          )}
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={(e) => { setImage(e.target.files[0]); setImageUrl(URL.createObjectURL(e.target.files[0])); }} 
+            id="image"
+            name="image"
+          />
+        </div>
         <label htmlFor="content" className="font-bold text-xl">Content:</label>
         <textarea
           placeholder="How do you feel now?"
@@ -145,15 +132,14 @@ function CreatePost() {
           rows="10"
         />
       </div>
-
       <div className="flex justify-center mb-6 mx-auto">
-        <Button onClick={createPost} className="bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded-lg mr-20">
+        <Button onClick={createPost} className="bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
           Post
         </Button>
-        <Button onClick={clearVal} className="bg-yellow-500 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg mr-20">
+        <Button onClick={() => { setTitle(""); setDate(""); setContent(""); setImage(null); setImageUrl(""); }} className="bg-yellow-500 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg mx-20">
           Clear
         </Button>
-        <Button onClick={toHome} className="bg-red-500 hover:bg-red-700 text-white px-6 py-2 rounded-lg">
+        <Button onClick={handleClose} className="bg-red-500 hover:bg-red-700 text-white px-6 py-2 rounded-lg">
           Cancel
         </Button>
       </div>
