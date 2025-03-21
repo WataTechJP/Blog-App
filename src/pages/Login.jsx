@@ -57,14 +57,14 @@ function Login() {
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="w-80 p-2 border text-white rounded mb-2"
+        className="w-80 p-2 border text-black dark:bg-gray-800 dark:text-white rounded mb-2"
       />
       <input 
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="w-80 p-2 border text-white rounded mb-4"
+        className="w-80 p-2 border text-black dark:bg-gray-800 dark:text-white rounded mb-4"
       />
       <div className="flex flex-col text-center items-center justify-center">
         <Button onClick={signInWithEmail} className="bg-blue-500 text-white px-6 py-2 rounded-lg">
